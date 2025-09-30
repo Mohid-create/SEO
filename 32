@@ -1,0 +1,190 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
+import { Link, Plus, Trash2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
+import { generateBacklinks, generateLinkProspects } from '../data/mockData';
+import { Backlink, LinkProspect } from '../types';
+import { Badge } from '../components/ui/Badge';
+
+const Backlinks: React.FC = () => {
+  const [domains, setDomains] = useState<string[]>(['your-domain.com', 'competitor-1.com']);
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<{ backlinks: Backlink[], prospects: LinkProspect[] } | null>(null);
+
+  const handleDomainChange = (index: number, value: string) => {
+    const newDomains = [...domains];
+    newDomains[index] = value;
+    setDomains(newDomains);
+  };
+
+  const handleAddDomain = () => {
+    if (domains.length < 5) setDomains([...domains, '']);
+  };
+
+  const handleRemoveDomain = (index: number) => {
+    if (domains.length > 2) {
+      const newDomains = [...domains];
+      newDomains.splice(index, 1);
+      setDomains(newDomains);
+    }
+  };
+
+  const handleAnalyze = () => {
+    setIsLoading(true);
+    setResults(null);
+    setTimeout(() => {
+      setResults({
+        backlinks: generateBacklinks(50),
+        prospects: generateLinkProspects(20),
+      });
+      setIsLoading(false);
+    }, 2000);
+  };
+
+  const outreachTemplate = `Subject: Question about {{Your Article}}
+
+Hi {{Prospect Name}},
+
+I was looking for information on {{Topic}} and came across your excellent article: {{Prospect Article URL}}
+
+I especially liked your point on {{Specific Point}}.
+
+I've just published a new guide on a related topic that I think your readers would find valuable. It covers {{Your Value Prop}}.
+
+You can check it out here: {{Your URL}}
+
+Would you consider adding a link to it from your article?
+
+Thanks for your time and consideration.
+
+Best,
+{{Your Name}}`;
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-3xl font-bold tracking-tight">Backlink Intelligence</h2>
+        <p className="text-muted-foreground max-w-2xl">
+          Analyze backlink profiles, find high-authority prospects, and manage outreach campaigns.
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Analyze Backlink Profiles</CardTitle>
+          <CardDescription>Enter your domain and up to 4 competitors.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Your Domain</label>
+            <Input placeholder="https://your-domain.com" value={domains[0]} onChange={(e) => handleDomainChange(0, e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Competitor Domains</label>
+            {domains.slice(1).map((domain, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <Input placeholder={`https://competitor-${index + 1}.com`} value={domain} onChange={(e) => handleDomainChange(index + 1, e.target.value)} />
+                {domains.length > 2 && <Button variant="ghost" size="icon" onClick={() => handleRemoveDomain(index + 1)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>}
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={handleAddDomain} disabled={domains.length >= 5} className="w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" />Add Competitor</Button>
+            <Button onClick={handleAnalyze} disabled={isLoading} className="w-full sm:w-auto flex-grow sm:flex-grow-0">
+              {isLoading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div> : <Link className="mr-2 h-4 w-4" />}
+              {isLoading ? 'Analyzing...' : 'Analyze Backlinks'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {(isLoading || results) && (
+        <Tabs defaultValue="overview">
+          <TabsList>
+            <TabsTrigger value="overview">Backlink Profile</TabsTrigger>
+            <TabsTrigger value="prospects">Link Prospects</TabsTrigger>
+            <TabsTrigger value="outreach">Outreach Templates</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview">
+            <Card>
+              <CardHeader><CardTitle>Backlink Profile</CardTitle><CardDescription>A list of backlinks pointing to the analyzed domains.</CardDescription></CardHeader>
+              <CardContent>
+                {isLoading ? <p>Loading backlink data...</p> : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                      <thead className="text-xs text-muted-foreground uppercase bg-secondary/50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3">Referring Domain</th>
+                          <th scope="col" className="px-6 py-3">Anchor Text</th>
+                          <th scope="col" className="px-6 py-3 text-right">Domain Auth.</th>
+                          <th scope="col" className="px-6 py-3">Type</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {results?.backlinks.map(link => (
+                          <tr key={link.id} className="border-b hover:bg-accent/50">
+                            <td className="px-6 py-4 font-medium truncate max-w-xs"><a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">{link.domain}</a></td>
+                            <td className="px-6 py-4 text-muted-foreground truncate max-w-sm">{link.anchorText}</td>
+                            <td className="px-6 py-4 text-right font-semibold">{link.domainAuthority}</td>
+                            <td className="px-6 py-4"><Badge variant={link.isFollow ? 'default' : 'secondary'}>{link.isFollow ? 'Follow' : 'Nofollow'}</Badge></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="prospects">
+             <Card>
+              <CardHeader><CardTitle>Link Prospects</CardTitle><CardDescription>High-authority domains to target for link building.</CardDescription></CardHeader>
+              <CardContent>
+                {isLoading ? <p>Finding prospects...</p> : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                      <thead className="text-xs text-muted-foreground uppercase bg-secondary/50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3">Domain</th>
+                          <th scope="col" className="px-6 py-3 text-right">Domain Auth.</th>
+                          <th scope="col" className="px-6 py-3">Contact</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {results?.prospects.map(prospect => (
+                          <tr key={prospect.id} className="border-b hover:bg-accent/50">
+                            <td className="px-6 py-4 font-medium">{prospect.domain}</td>
+                            <td className="px-6 py-4 text-right font-semibold">{prospect.domainAuthority}</td>
+                            <td className="px-6 py-4">{prospect.contactEmail ? <a href={`mailto:${prospect.contactEmail}`} className="text-primary hover:underline">{prospect.contactEmail}</a> : <a href={prospect.contactUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Contact Form</a>}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="outreach">
+            <Card>
+              <CardHeader><CardTitle>Outreach Email Template</CardTitle><CardDescription>A template for your link building outreach.</CardDescription></CardHeader>
+              <CardContent>
+                <div className="p-4 bg-secondary rounded-md">
+                  <pre className="text-sm whitespace-pre-wrap font-sans">{outreachTemplate}</pre>
+                </div>
+                <Button className="mt-4" onClick={() => navigator.clipboard.writeText(outreachTemplate)}>Copy Template</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      )}
+    </div>
+  );
+};
+
+export default Backlinks;

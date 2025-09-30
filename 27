@@ -1,0 +1,60 @@
+import React from 'react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui/Card';
+import { generateKeywordData } from '../../data/mockData';
+import { KeywordData } from '../../types';
+import { cn } from '../../lib/utils';
+
+const keywords: KeywordData[] = generateKeywordData(5);
+
+const TopKeywordsTable: React.FC = () => {
+  return (
+    <Card className="col-span-1 lg:col-span-3">
+      <CardHeader>
+        <CardTitle>Top Keywords</CardTitle>
+        <CardDescription>Your best performing keywords this month.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="text-xs text-muted-foreground uppercase bg-secondary/50">
+              <tr>
+                <th scope="col" className="px-6 py-3">Keyword</th>
+                <th scope="col" className="px-6 py-3">Position</th>
+                <th scope="col" className="px-6 py-3">Volume</th>
+                <th scope="col" className="px-6 py-3">Difficulty</th>
+                <th scope="col" className="px-6 py-3">URL</th>
+              </tr>
+            </thead>
+            <tbody>
+              {keywords.map(kw => (
+                <tr key={kw.id} className="border-b">
+                  <th scope="row" className="px-6 py-4 font-medium whitespace-nowrap">{kw.keyword}</th>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center">
+                      {kw.position}
+                      <span className={cn(
+                        'ml-2 flex items-center text-xs',
+                        kw.change > 0 ? 'text-green-500' : 'text-red-500'
+                      )}>
+                        {kw.change > 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                        {Math.abs(kw.change)}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">{kw.volume.toLocaleString()}</td>
+                  <td className="px-6 py-4">{kw.difficulty}</td>
+                  <td className="px-6 py-4 text-primary hover:underline truncate max-w-xs">
+                    <a href={kw.url} title={kw.url}>{kw.url}</a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default TopKeywordsTable;

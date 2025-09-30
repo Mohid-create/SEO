@@ -1,0 +1,133 @@
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
+import { Input } from '../components/ui/Input';
+import { Label } from '../components/ui/Label';
+import { Button } from '../components/ui/Button';
+import { Switch } from '../components/ui/Switch';
+import { Badge } from '../components/ui/Badge';
+
+const Settings: React.FC = () => {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+        <p className="text-muted-foreground max-w-2xl">
+          Manage your account settings, subscription, and integrations.
+        </p>
+      </div>
+
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="subscription">Subscription</TabsTrigger>
+          <TabsTrigger value="api-keys">API Keys</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile">
+          <Card>
+            <CardHeader><CardTitle>Profile</CardTitle><CardDescription>Update your personal information.</CardDescription></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input id="name" defaultValue="John Doe" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input id="email" type="email" defaultValue="john.doe@example.com" disabled />
+              </div>
+              <Button>Save Changes</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="subscription">
+          <Card>
+            <CardHeader><CardTitle>Subscription</CardTitle><CardDescription>Manage your billing and subscription plan.</CardDescription></CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold">Current Plan</h3>
+                <p className="text-muted-foreground">You are currently on the <Badge>Premium</Badge> plan.</p>
+                <p className="text-sm text-muted-foreground">Renews on: January 1, 2026</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="border-primary">
+                  <CardHeader>
+                    <CardTitle>Premium Plan</CardTitle>
+                    <CardDescription className="text-2xl font-bold">$29<span className="text-sm font-normal text-muted-foreground">/month</span></CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button className="w-full" disabled>Current Plan</Button>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Enterprise Plan</CardTitle>
+                    <CardDescription className="text-2xl font-bold">$99<span className="text-sm font-normal text-muted-foreground">/month</span></CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" className="w-full">Upgrade to Enterprise</Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="api-keys">
+           <Card>
+            <CardHeader><CardTitle>API Keys</CardTitle><CardDescription>Manage integrations with third-party services.</CardDescription></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="google-api">Google Ads API Key</Label>
+                <Input id="google-api" placeholder="Enter your Google Ads API Key" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="semrush-api">SEMrush API Key</Label>
+                <Input id="semrush-api" placeholder="Enter your SEMrush API Key" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="serpapi-api">SerpApi API Key</Label>
+                <Input id="serpapi-api" placeholder="Enter your SerpApi API Key" />
+              </div>
+              <Button>Save API Keys</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="notifications">
+           <Card>
+            <CardHeader><CardTitle>Notifications</CardTitle><CardDescription>Manage your email notification preferences.</CardDescription></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-md border">
+                <div>
+                  <Label htmlFor="weekly-report" className="font-semibold">Weekly Performance Report</Label>
+                  <p className="text-sm text-muted-foreground">Receive a summary of your site's performance every Monday.</p>
+                </div>
+                <Switch id="weekly-report" defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-md border">
+                <div>
+                  <Label htmlFor="rank-changes" className="font-semibold">Keyword Rank Changes</Label>
+                  <p className="text-sm text-muted-foreground">Get notified when your tracked keywords enter or leave the top 10.</p>
+                </div>
+                <Switch id="rank-changes" defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-md border">
+                <div>
+                  <Label htmlFor="product-updates" className="font-semibold">Product Updates</Label>
+                  <p className="text-sm text-muted-foreground">Receive news about new features and updates to CogniRank.</p>
+                </div>
+                <Switch id="product-updates" />
+              </div>
+              <Button>Save Preferences</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default Settings;

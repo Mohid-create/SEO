@@ -1,0 +1,70 @@
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { BarChart3, Bot, ChevronLeft, FileText, GanttChart, Gem, Link, Search, Settings, ShieldCheck } from 'lucide-react';
+import { cn } from '../../lib/utils';
+
+const navItems = [
+  { to: '/', icon: BarChart3, label: 'Dashboard' },
+  { to: '/keyword-research', icon: Search, label: 'Keyword Research' },
+  { to: '/content-gap', icon: GanttChart, label: 'Content Gap' },
+  { to: '/seo-audit', icon: ShieldCheck, label: 'SEO Audit' },
+  { to: '/backlinks', icon: Link, label: 'Backlinks' },
+  { to: '/ai-assistant', icon: Bot, label: 'AI Assistant' },
+];
+
+interface SidebarProps {
+  isCollapsed: boolean;
+  toggleSidebar: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar }) => {
+  return (
+    <aside className={cn(
+      "relative bg-card border-r transition-all duration-300 ease-in-out flex flex-col",
+      isCollapsed ? "w-20" : "w-64"
+    )}>
+      <div className="flex items-center justify-between p-4 border-b">
+        {!isCollapsed && <h1 className="text-xl font-bold text-primary flex items-center gap-2"><Gem size={24} /> CogniRank</h1>}
+        <button onClick={toggleSidebar} className="p-2 rounded-md hover:bg-accent">
+          <ChevronLeft className={cn("transition-transform", isCollapsed && "rotate-180")} />
+        </button>
+      </div>
+
+      <nav className="flex-grow p-2 space-y-2">
+        {navItems.map(item => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end
+            className={({ isActive }) => cn(
+              "flex items-center p-3 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors",
+              isActive && "bg-primary/10 text-primary font-semibold",
+              isCollapsed && "justify-center"
+            )}
+            title={isCollapsed ? item.label : undefined}
+          >
+            <item.icon className="h-5 w-5" />
+            {!isCollapsed && <span className="ml-4">{item.label}</span>}
+          </NavLink>
+        ))}
+      </nav>
+      
+      <div className="p-2 border-t">
+        <NavLink
+            to="/settings"
+            className={({ isActive }) => cn(
+              "flex items-center p-3 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors",
+              isActive && "bg-primary/10 text-primary font-semibold",
+              isCollapsed && "justify-center"
+            )}
+            title={isCollapsed ? "Settings" : undefined}
+          >
+            <Settings className="h-5 w-5" />
+            {!isCollapsed && <span className="ml-4">Settings</span>}
+          </NavLink>
+      </div>
+    </aside>
+  );
+};
+
+export default Sidebar;

@@ -1,0 +1,112 @@
+import { faker } from '@faker-js/faker';
+import { KeywordData, KeywordResearchResult, SeoAuditResult, AuditCheck, Backlink, LinkProspect } from '../types';
+
+export const generateKeywordData = (count: number): KeywordData[] => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: faker.string.uuid(),
+    keyword: faker.lorem.words({ min: 2, max: 4 }),
+    position: faker.number.int({ min: 1, max: 100 }),
+    change: faker.number.int({ min: -5, max: 5 }),
+    volume: faker.number.int({ min: 100, max: 50000 }),
+    difficulty: faker.number.int({ min: 10, max: 90 }),
+    url: '/' + faker.lorem.slug(),
+  }));
+};
+
+export const generateTrafficData = () => {
+  const data = [];
+  for (let i = 11; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    data.push({
+      name: date.toLocaleString('default', { month: 'short' }),
+      traffic: faker.number.int({ min: 5000, max: 25000 }),
+    });
+  }
+  return data;
+};
+
+export const generateKeywordResearchData = (count: number): KeywordResearchResult[] => {
+  return Array.from({ length: count }, () => ({
+    id: faker.string.uuid(),
+    keyword: faker.lorem.words({ min: 2, max: 4 }),
+    volume: faker.number.int({ min: 100, max: 150000 }),
+    cpc: `$${faker.finance.amount(0.1, 15, 2)}`,
+    competition: faker.helpers.arrayElement(['Low', 'Medium', 'High']),
+    difficulty: faker.number.int({ min: 5, max: 95 }),
+    opportunity: faker.number.int({ min: 20, max: 98 }),
+  }));
+};
+
+const auditChecks: Omit<AuditCheck, 'status' | 'details'>[] = [
+  { id: 'title-tag', title: 'Title Tag', description: 'Checks for presence, length, and keyword usage in the title tag.', recommendation: 'Ensure the title is between 50-60 characters and includes the primary keyword.' },
+  { id: 'meta-desc', title: 'Meta Description', description: 'Analyzes the meta description for length and relevance.', recommendation: 'Write a compelling meta description between 150-160 characters to improve click-through rates.' },
+  { id: 'headings', title: 'Header Structure (H1-H6)', description: 'Verifies a logical heading structure with a single H1.', recommendation: 'Use only one H1 tag per page and structure content logically with H2-H6 tags.' },
+  { id: 'img-alt', title: 'Image Alt Attributes', description: 'Ensures all images have descriptive alt text.', recommendation: 'Add descriptive alt text to all images to improve accessibility and image SEO.' },
+  { id: 'page-speed', title: 'Page Speed', description: 'Measures core web vitals and overall loading performance.', recommendation: 'Optimize images, leverage browser caching, and minify CSS/JS to improve page load times.' },
+  { id: 'mobile-friendly', title: 'Mobile-Friendliness', description: 'Tests if the page is responsive and usable on mobile devices.', recommendation: 'Use a responsive design to ensure your site looks great on all devices.' },
+  { id: 'internal-links', title: 'Internal Linking', description: 'Counts the number of internal links on the page.', recommendation: 'Add at least 2-3 relevant internal links to help search engines understand your site structure.' },
+];
+
+export const generateSeoAuditResult = (url: string): SeoAuditResult => {
+  const checks: AuditCheck[] = auditChecks.map(check => {
+    const status = faker.helpers.arrayElement(['pass', 'fail', 'warn']);
+    let details = '';
+    switch(status) {
+      case 'pass': details = `Your ${check.title.toLowerCase()} is well-optimized.`; break;
+      case 'warn': details = `Your ${check.title.toLowerCase()} could be improved.`; break;
+      case 'fail': details = `Your ${check.title.toLowerCase()} has critical issues.`; break;
+    }
+    return { ...check, status, details };
+  });
+
+  const score = Math.round(checks.filter(c => c.status === 'pass').length / checks.length * 100);
+
+  return { url, score, checks };
+};
+
+export const generateBacklinks = (count: number): Backlink[] => {
+  return Array.from({ length: count }, () => ({
+    id: faker.string.uuid(),
+    domain: faker.internet.domainName(),
+    url: faker.internet.url(),
+    anchorText: faker.lorem.sentence({min: 3, max: 7}),
+    domainAuthority: faker.number.int({ min: 10, max: 99 }),
+    pageAuthority: faker.number.int({ min: 5, max: 80 }),
+    isFollow: faker.datatype.boolean(0.8),
+  }));
+};
+
+export const generateLinkProspects = (count: number): LinkProspect[] => {
+  return Array.from({ length: count }, () => ({
+    id: faker.string.uuid(),
+    domain: faker.internet.domainName(),
+    domainAuthority: faker.number.int({ min: 40, max: 99 }),
+    contactEmail: faker.helpers.arrayElement([faker.internet.email(), null]),
+    contactUrl: faker.internet.url() + '/contact',
+  }));
+};
+
+export const generateAiBlogTitles = (topic: string): string[] => {
+  return Array.from({ length: 10 }, () => 
+    `${faker.helpers.arrayElement(['The Ultimate Guide to', '10 Powerful Tips for', 'How to Master', 'Why Everyone is Talking About'])} ${topic}`
+  );
+};
+
+export const generateAiContentOutline = (topic: string): string[] => {
+  return [
+    `Introduction: The Importance of ${topic}`,
+    `Understanding the Basics of ${topic}`,
+    `Advanced Strategies for ${topic}`,
+    `Common Mistakes to Avoid`,
+    `Tools and Resources for ${topic}`,
+    `Conclusion: Key Takeaways`,
+  ];
+};
+
+export const generateAiMetaDescriptions = (topic: string): { text: string, length: number }[] => {
+  return Array.from({ length: 3 }, () => {
+    const text = `Discover expert tips and strategies for ${topic}. ${faker.lorem.sentence({min: 5, max: 10})}`.slice(0, 158);
+    return { text, length: text.length };
+  });
+};

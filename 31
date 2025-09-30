@@ -1,0 +1,161 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
+import { ShieldCheck, Search, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { generateSeoAuditResult } from '../data/mockData';
+import { SeoAuditResult, AuditCheck } from '../types';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/Accordion';
+import { cn } from '../lib/utils';
+
+const CircularProgress = ({ score }: { score: number }) => {
+  const radius = 50;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (score / 100) * circumference;
+  const scoreColor = score > 80 ? 'text-green-500' : score > 50 ? 'text-yellow-500' : 'text-red-500';
+
+  return (
+    <div className="relative flex items-center justify-center w-32 h-32 sm:w-40 sm:h-40">
+      <svg className="absolute w-full h-full" viewBox="0 0 120 120">
+        <circle
+          className="text-border"
+          strokeWidth="10"
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx="60"
+          cy="60"
+        />
+        <circle
+          className={cn('transition-all duration-1000 ease-out', scoreColor)}
+          strokeWidth="10"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx="60"
+          cy="60"
+          transform="rotate(-90 60 60)"
+        />
+      </svg>
+      <span className={cn("text-3xl sm:text-4xl font-bold", scoreColor)}>{score}</span>
+    </div>
+  );
+};
+
+const statusIcons = {
+  pass: <CheckCircle className="h-5 w-5 text-green-500" />,
+  fail: <XCircle className="h-5 w-5 text-red-500" />,
+  warn: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
+};
+
+const SeoAudit: React.FC = () => {
+  const [url, setUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<SeoAuditResult | null>(null);
+
+  const handleAnalyze = () => {
+    if (!url) return;
+    setIsLoading(true);
+    setResult(null);
+    setTimeout(() => {
+      setResult(generateSeoAuditResult(url));
+      setIsLoading(false);
+    }, 2000);
+  };
+
+  const summary = result ? {
+    pass: result.checks.filter(c => c.status === 'pass').length,
+    warn: result.checks.filter(c => c.status === 'warn').length,
+    fail: result.checks.filter(c => c.status === 'fail').length,
+  } : null;
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-3xl font-bold tracking-tight">On-Page SEO Audit</h2>
+        <p className="text-muted-foreground max-w-2xl">
+          Analyze any webpage for technical SEO factors and get actionable recommendations.
+        </p>
+      </div>
+
+      <Card>
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              placeholder="https://your-domain.com/a-page"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
+            />
+            <Button onClick={handleAnalyze} disabled={isLoading} className="w-full sm:w-auto">
+              {isLoading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div> : <Search className="mr-2 h-4 w-4" />}
+              {isLoading ? 'Analyzing...' : 'Analyze'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {isLoading && (
+        <div className="flex flex-col justify-center items-center h-64 text-center rounded-lg border bg-card">
+          <ShieldCheck className="h-12 w-12 text-primary animate-pulse mb-4" />
+          <p className="text-muted-foreground">Auditing your page, please wait...</p>
+        </div>
+      )}
+
+      {result && summary && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle>Overall Score</CardTitle>
+              <CardDescription className="truncate">{result.url}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center gap-4">
+              <CircularProgress score={result.score} />
+              <div className="flex justify-around w-full text-center">
+                <div><p className="text-2xl font-bold text-green-500">{summary.pass}</p><p className="text-xs text-muted-foreground">Passed</p></div>
+                <div><p className="text-2xl font-bold text-yellow-500">{summary.warn}</p><p className="text-xs text-muted-foreground">Warnings</p></div>
+                <div><p className="text-2xl font-bold text-red-500">{summary.fail}</p><p className="text-xs text-muted-foreground">Failed</p></div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Audit Checklist</CardTitle>
+              <CardDescription>Detailed analysis of all on-page SEO factors.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible className="w-full">
+                {result.checks.map(check => (
+                  <AccordionItem value={check.id} key={check.id}>
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-3">
+                        {statusIcons[check.status]}
+                        <span>{check.title}</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-2 pl-8">
+                      <p className="text-sm text-muted-foreground">{check.description}</p>
+                      <p className="text-sm">{check.details}</p>
+                      {check.status !== 'pass' && (
+                        <div className="p-3 bg-secondary rounded-md">
+                          <p className="text-sm font-semibold">Recommendation:</p>
+                          <p className="text-sm text-muted-foreground">{check.recommendation}</p>
+                        </div>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SeoAudit;

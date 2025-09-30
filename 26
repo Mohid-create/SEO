@@ -1,0 +1,42 @@
+import React from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui/Card';
+import { generateTrafficData } from '../../data/mockData';
+import { useTheme } from '../../hooks/useTheme';
+
+const trafficData = generateTrafficData();
+
+const TrafficChart: React.FC = () => {
+  const { theme } = useTheme();
+  const strokeColor = theme === 'dark' ? '#8884d8' : '#4f46e5';
+  const gridColor = theme === 'dark' ? '#374151' : '#e5e7eb';
+  const textColor = theme === 'dark' ? '#9ca3af' : '#6b7280';
+
+  return (
+    <Card className="col-span-1 lg:col-span-2">
+      <CardHeader>
+        <CardTitle>Organic Traffic</CardTitle>
+        <CardDescription>Last 12 months</CardDescription>
+      </CardHeader>
+      <CardContent className="h-80">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={trafficData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis dataKey="name" stroke={textColor} fontSize={12} />
+            <YAxis stroke={textColor} fontSize={12} tickFormatter={(value) => `${Number(value) / 1000}k`} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: theme === 'dark' ? 'hsl(var(--background))' : '#fff',
+                borderColor: 'hsl(var(--border))'
+              }}
+            />
+            <Legend />
+            <Line type="monotone" dataKey="traffic" stroke={strokeColor} strokeWidth={2} dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default TrafficChart;

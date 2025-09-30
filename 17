@@ -1,0 +1,52 @@
+export interface KeywordData {
+  id: string;
+  keyword: string;
+  position: number;
+  change: number;
+  volume: number;
+  difficulty: number;
+  url: string;
+}
+
+export interface KeywordResearchResult {
+  id: string;
+  keyword: string;
+  volume: number;
+  cpc: string;
+  competition: 'Low' | 'Medium' | 'High';
+  difficulty: number;
+  opportunity: number;
+}
+
+export interface AuditCheck {
+  id: string;
+  title: string;
+  description: string;
+  status: 'pass' | 'fail' | 'warn';
+  recommendation: string;
+  details: string;
+}
+
+export interface SeoAuditResult {
+  score: number;
+  url: string;
+  checks: AuditCheck[];
+}
+
+export interface Backlink {
+  id: string;
+  domain: string;
+  url: string;
+  anchorText: string;
+  domainAuthority: number;
+  pageAuthority: number;
+  isFollow: boolean;
+}
+
+export interface LinkProspect {
+  id: string;
+  domain: string;
+  domainAuthority: number;
+  contactEmail: string | null;
+  contactUrl: string;
+}

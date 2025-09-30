@@ -1,0 +1,27 @@
+import React from 'react';
+import { DollarSign, BarChart, Users, Zap } from 'lucide-react';
+import OverviewCard from '../components/Dashboard/OverviewCard';
+import TrafficChart from '../components/Dashboard/TrafficChart';
+import TopKeywordsTable from '../components/Dashboard/TopKeywordsTable';
+
+const Dashboard: React.FC = () => {
+  return (
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+      
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <OverviewCard title="Domain Authority" value="78" change={2.1} icon={Zap} />
+        <OverviewCard title="Keywords in Top 10" value="1,234" change={-5} icon={BarChart} />
+        <OverviewCard title="Monthly Traffic" value="12,450" change={12.5} icon={Users} />
+        <OverviewCard title="Estimated Traffic Cost" value="$21,840" change={8} icon={DollarSign} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <TrafficChart />
+        <TopKeywordsTable />
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

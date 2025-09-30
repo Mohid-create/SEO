@@ -1,0 +1,134 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Textarea } from '../components/ui/Textarea';
+import { Bot, Sparkles } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
+import { generateAiBlogTitles, generateAiContentOutline, generateAiMetaDescriptions } from '../data/mockData';
+
+type AiTool = 'titles' | 'outline' | 'meta';
+
+const AiAssistant: React.FC = () => {
+  const [topic, setTopic] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<any>(null);
+  const [activeTool, setActiveTool] = useState<AiTool>('titles');
+
+  const handleGenerate = (tool: AiTool) => {
+    if (!topic) return;
+    setIsLoading(true);
+    setResults(null);
+    setActiveTool(tool);
+
+    setTimeout(() => {
+      let generatedContent;
+      switch (tool) {
+        case 'titles': generatedContent = generateAiBlogTitles(topic); break;
+        case 'outline': generatedContent = generateAiContentOutline(topic); break;
+        case 'meta': generatedContent = generateAiMetaDescriptions(topic); break;
+        default: generatedContent = null;
+      }
+      setResults(generatedContent);
+      setIsLoading(false);
+    }, 1500);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-3xl font-bold tracking-tight">AI Content Assistant</h2>
+        <p className="text-muted-foreground max-w-2xl">
+          Generate SEO-optimized titles, outlines, and meta descriptions for your content.
+        </p>
+      </div>
+
+      <Tabs defaultValue="titles" className="w-full" onValueChange={(val) => setResults(null)}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="titles">Title Generator</TabsTrigger>
+          <TabsTrigger value="outline">Outline Creator</TabsTrigger>
+          <TabsTrigger value="meta">Meta Description Writer</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="titles">
+          <Card>
+            <CardHeader><CardTitle>Blog Post Title Generator</CardTitle><CardDescription>Enter a topic to generate 10 catchy, SEO-friendly titles.</CardDescription></CardHeader>
+            <CardContent className="space-y-4">
+              <Input placeholder="e.g., 'digital marketing trends'" value={topic} onChange={e => setTopic(e.target.value)} />
+              <Button onClick={() => handleGenerate('titles')} disabled={isLoading && activeTool === 'titles'} className="w-full sm:w-auto">
+                {isLoading && activeTool === 'titles' ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div> : <Sparkles className="mr-2 h-4 w-4" />}
+                Generate Titles
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="outline">
+          <Card>
+            <CardHeader><CardTitle>Content Outline Creator</CardTitle><CardDescription>Enter a topic to generate a detailed content outline.</CardDescription></CardHeader>
+            <CardContent className="space-y-4">
+              <Input placeholder="e.g., 'the future of AI in SEO'" value={topic} onChange={e => setTopic(e.target.value)} />
+              <Button onClick={() => handleGenerate('outline')} disabled={isLoading && activeTool === 'outline'} className="w-full sm:w-auto">
+                {isLoading && activeTool === 'outline' ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div> : <Sparkles className="mr-2 h-4 w-4" />}
+                Create Outline
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="meta">
+          <Card>
+            <CardHeader><CardTitle>Meta Description Writer</CardTitle><CardDescription>Enter your main topic to generate compelling meta descriptions.</CardDescription></CardHeader>
+            <CardContent className="space-y-4">
+              <Textarea placeholder="Briefly describe your content or just enter your main keyword..." value={topic} onChange={e => setTopic(e.target.value)} />
+              <Button onClick={() => handleGenerate('meta')} disabled={isLoading && activeTool === 'meta'} className="w-full sm:w-auto">
+                {isLoading && activeTool === 'meta' ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div> : <Sparkles className="mr-2 h-4 w-4" />}
+                Write Descriptions
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {(isLoading || results) && (
+        <Card>
+          <CardHeader className="flex flex-row items-center gap-2">
+            <Bot className="h-6 w-6 text-primary" />
+            <div>
+              <CardTitle>AI Generated Results</CardTitle>
+              <CardDescription>Showing results for "{topic}"</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? <p>Generating content...</p> : (
+              <div className="space-y-4">
+                {activeTool === 'titles' && (
+                  <ul className="space-y-2 list-disc list-inside">
+                    {results.map((title: string, i: number) => <li key={i}>{title}</li>)}
+                  </ul>
+                )}
+                {activeTool === 'outline' && (
+                  <ul className="space-y-2 list-decimal list-inside">
+                    {results.map((item: string, i: number) => <li key={i} className="font-semibold">{item}</li>)}
+                  </ul>
+                )}
+                {activeTool === 'meta' && (
+                  <div className="space-y-4">
+                    {results.map((meta: { text: string; length: number }, i: number) => (
+                      <div key={i} className="p-3 bg-secondary rounded-md">
+                        <p>{meta.text}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Character count: {meta.length}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export default AiAssistant;

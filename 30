@@ -1,0 +1,169 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
+import { Plus, Trash2, GanttChart } from 'lucide-react';
+import { Badge } from '../components/ui/Badge';
+import { faker } from '@faker-js/faker';
+
+interface GapResult {
+  keyword: string;
+  userPosition: number | null;
+  competitorPositions: (number | null)[];
+  volume: number;
+  difficulty: number;
+}
+
+const generateGapResults = (competitorCount: number): GapResult[] => {
+  return Array.from({ length: 20 }, () => ({
+    keyword: faker.lorem.words({ min: 2, max: 4 }),
+    userPosition: faker.helpers.arrayElement([null, faker.number.int({ min: 11, max: 100 })]),
+    competitorPositions: Array.from({ length: competitorCount }, () => faker.helpers.arrayElement([null, faker.number.int({ min: 1, max: 10 })])),
+    volume: faker.number.int({ min: 100, max: 50000 }),
+    difficulty: faker.number.int({ min: 10, max: 90 }),
+  }));
+};
+
+
+const ContentGap: React.FC = () => {
+  const [userDomain, setUserDomain] = useState('your-domain.com');
+  const [competitorDomains, setCompetitorDomains] = useState<string[]>(['competitor-1.com', 'competitor-2.com']);
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<GapResult[] | null>(null);
+
+  const handleAddCompetitor = () => {
+    if (competitorDomains.length < 5) {
+      setCompetitorDomains([...competitorDomains, '']);
+    }
+  };
+
+  const handleRemoveCompetitor = (index: number) => {
+    const newCompetitors = [...competitorDomains];
+    newCompetitors.splice(index, 1);
+    setCompetitorDomains(newCompetitors);
+  };
+
+  const handleCompetitorChange = (index: number, value: string) => {
+    const newCompetitors = [...competitorDomains];
+    newCompetitors[index] = value;
+    setCompetitorDomains(newCompetitors);
+  };
+
+  const handleAnalyze = () => {
+    setIsLoading(true);
+    setResults(null);
+    setTimeout(() => {
+      setResults(generateGapResults(competitorDomains.length));
+      setIsLoading(false);
+    }, 2000);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-3xl font-bold tracking-tight">Content Gap Analysis</h2>
+        <p className="text-muted-foreground max-w-2xl">
+          Discover keywords your competitors rank for, but you don't.
+        </p>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Analyze Keyword Gaps</CardTitle>
+          <CardDescription>Enter your domain and up to 5 competitor domains to find content opportunities.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Your Domain</label>
+            <Input 
+              placeholder="https://your-domain.com" 
+              value={userDomain}
+              onChange={(e) => setUserDomain(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Competitor Domains</label>
+            {competitorDomains.map((domain, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <Input 
+                  placeholder={`https://competitor-${index + 1}.com`} 
+                  value={domain}
+                  onChange={(e) => handleCompetitorChange(index, e.target.value)}
+                />
+                <Button variant="ghost" size="icon" onClick={() => handleRemoveCompetitor(index)} className="text-muted-foreground hover:text-destructive">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={handleAddCompetitor} disabled={competitorDomains.length >= 5} className="w-full sm:w-auto">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Competitor
+            </Button>
+            <Button onClick={handleAnalyze} disabled={isLoading} className="w-full sm:w-auto flex-grow sm:flex-grow-0">
+               {isLoading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+              ) : (
+                <GanttChart className="mr-2 h-4 w-4" />
+              )}
+              {isLoading ? 'Analyzing...' : 'Analyze Gaps'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {isLoading && (
+        <div className="flex flex-col justify-center items-center h-64 text-center rounded-lg border bg-card">
+           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+          <p className="text-muted-foreground">Comparing domains and finding keyword gaps...</p>
+        </div>
+      )}
+
+      {results && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Keyword Opportunities</CardTitle>
+            <CardDescription>Keywords where at least one competitor ranks in the top 10, but you don't.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-muted-foreground uppercase bg-secondary/50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 font-medium">Keyword</th>
+                    <th scope="col" className="px-6 py-3 font-medium text-right">Volume</th>
+                    <th scope="col" className="px-6 py-3 font-medium text-right">Difficulty</th>
+                    <th scope="col" className="px-6 py-3 font-medium text-center">{userDomain}</th>
+                    {competitorDomains.map((domain, i) => (
+                      <th key={i} scope="col" className="px-6 py-3 font-medium text-center truncate max-w-[150px]">{domain || `Competitor ${i+1}`}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {results.map((res, i) => (
+                    <tr key={i} className="border-b hover:bg-accent/50 transition-colors">
+                      <th scope="row" className="px-6 py-4 font-medium whitespace-nowrap text-foreground">{res.keyword}</th>
+                      <td className="px-6 py-4 text-right">{res.volume.toLocaleString()}</td>
+                      <td className="px-6 py-4 text-right">{res.difficulty}</td>
+                      <td className="px-6 py-4 text-center">
+                        {res.userPosition ? <Badge variant="secondary">{res.userPosition}</Badge> : <span className="text-muted-foreground">-</span>}
+                      </td>
+                      {res.competitorPositions.map((pos, j) => (
+                        <td key={j} className="px-6 py-4 text-center">
+                          {pos ? <Badge variant="default">{pos}</Badge> : <span className="text-muted-foreground">-</span>}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export default ContentGap;

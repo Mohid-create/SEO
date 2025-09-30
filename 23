@@ -1,0 +1,37 @@
+import React from 'react';
+import { Search, Bell, Sun, Moon, ChevronDown } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
+
+const Header: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    <header className="bg-card border-b p-4 flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        {/* Search Bar - can be implemented later */}
+      </div>
+      <div className="flex items-center gap-4">
+        <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-accent">
+          {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+        </button>
+        <button className="p-2 rounded-full hover:bg-accent">
+          <Bell className="h-5 w-5" />
+        </button>
+        <div className="flex items-center gap-2 cursor-pointer p-1 rounded-lg hover:bg-accent">
+          <img
+            src="https://i.pravatar.cc/40?u=a042581f4e29026704d"
+            alt="User"
+            className="w-8 h-8 rounded-full"
+          />
+          <div className="hidden md:block">
+            <p className="text-sm font-medium">John Doe</p>
+            <p className="text-xs text-muted-foreground">Premium User</p>
+          </div>
+          <ChevronDown className="h-4 w-4 text-muted-foreground hidden md:block" />
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
